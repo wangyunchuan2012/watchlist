@@ -25,7 +25,9 @@ def home_page():  # 视图函数
 
 @app.route('/')
 def index():
-    return render_template('index.html', name=name, movies=movies)  # 调用模板
+    user = User.query.first()
+    movies = Movie.query.all()
+    return render_template('index.html', user=user, movies=movies)  # 调用模板
 
 
 @app.route('/user/<name>')
@@ -58,17 +60,27 @@ def initdb(drop):
     click.echo('Initialized database.')
 
 
-name = 'Grey Li'
-
-movies = [
-
-    {'title': 'My Neighbor Totoro', 'year': '1988'}, {'title': 'Dead Poets Society', 'year': '1989'},
-    {'title': 'A Perfect World', 'year': '1993'}, {'title': 'Leon', 'year': '1994'},
-    {'title': 'Mahjong', 'year': '1996'}, {'title': 'Swallowtail Butterfly', 'year': '1996'},
-    {'title': 'King of Comedy', 'year': '1999'}, {'title': 'Devils on the Doorstep', 'year': '1999'},
-    {'title': 'WALL-E', 'year': '2008'}, {'title': 'The Pork of Music', 'year': '2012'},
-
-]
+@app.cli.command()  # 生成虚拟数据命令
+def forge():
+    """
+    generate fake data
+    :return:
+    """
+    db.create_all()
+    name = 'wangyunchuan'
+    movies = [{'title': 'My Neighbor Totoro', 'year': '1988'}, {'title': 'Dead Poets Society', 'year': '1989'},
+              {'title': 'A Perfect World', 'year': '1993'}, {'title': 'Leon', 'year': '1994'},
+              {'title': 'Mahjong', 'year': '1996'}, {'title': 'Swallowtail Butterfly', 'year': '1996'},
+              {'title': 'King of Comedy', 'year': '1999'}, {'title': 'Devils on the Doorstep', 'year': '1999'},
+              {'title': 'WALL-E', 'year': '2008'}, {'title': 'The Pork of Music', 'year': '2012'},
+              ]
+    user = User(name=name)
+    db.session.add(user)
+    for m in movies:
+        movie = Movie(title=m.get('title'), year=m.get('year'))
+        db.session.add(movie)
+    # db.session.commmit()
+    click.echo('Done .')
 
 
 class User(db.Model):  # 表名将会是 user（自动生成，小写处理）
